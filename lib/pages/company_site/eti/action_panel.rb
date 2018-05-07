@@ -1,0 +1,9 @@
+module CompanySite
+  module ETI
+    class ActionPanel < Page
+      include CompanySite::ETI
+
+      ActiveSupport.run_load_hooks(:'apress/selenium_eti/company_site/eti/action_panel', self)
+    end
+  end
+end

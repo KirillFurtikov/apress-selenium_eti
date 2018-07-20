@@ -11,4 +11,5 @@ require_relative '../pages/company_site/eti/scenario'
 require_relative '../pages/company_site/eti/table_header'
 require_relative '../pages/company_site/eti/table_products'
 require_relative '../pages/company_site/eti/table_status_bar'
-require_relative '../pages/company_site/eti/product'
+
+require_relative '../pages/company_site/eti/popups/rubricator'

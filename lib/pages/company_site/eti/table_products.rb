@@ -7,15 +7,19 @@ module CompanySite
         button(:add_new_product, css: '.new.js-add-product')
         elements(:products, :row, css: "*[id^='product-item']")
         elements(:names, :cell, css: '.js-eti-name')
+        elements(:rubrics, :cell, css: '.js-eti-rubric')
         elements(:public_state_icon, :cell, css: '.js-eti-status')
-        elements(:battery, :cell, css: '.js-battery-wrapper')
+        elements(:battery_level, :cell, css: '.js-battery-wrapper')
+        elements(:battery_title, :cell, css: '.battery')
 
-        def product(value)
-          if value.is_a? String
-            name_element = names_elements.select { |n| n.text == value }.first
+        button(:delete_product_icon, css: '.action-product .js-delete-product')
+
+        def product(param = {})
+          if param.key? :name
+            name_element = names_elements.select { |n| n.text == param[:name] }.first
             products_elements[names_elements.index(name_element)]
-          elsif value.is_a? Integer
-            products_elements[value]
+          elsif param.key? :index
+            products_elements[param[:index]]
           else
             nil
           end
@@ -38,6 +42,10 @@ module CompanySite
             .move_to(name_element.element)
             .click
             .send_keys(Selenium::WebDriver::Keys::KEYS[:enter])
+            .key_down(:control)
+            .send_keys('a')
+            .key_up(:control)
+            .send_keys(Selenium::WebDriver::Keys::KEYS[:clear])
             .send_keys(params[:text])
             .send_keys(Selenium::WebDriver::Keys::KEYS[:enter])
             .perform
@@ -50,8 +58,11 @@ module CompanySite
           names_elements[product_index(product)].element.text
         end
 
-        def battery_value
-          battery.tr('%', '').to_i
+        def battery(product)
+          {
+            level: battery_level_elements[product_index(product)].text,
+            title: battery_title_elements[product_index(product)].attribute('title')
+          }
         end
 
         def price
@@ -59,14 +70,28 @@ module CompanySite
         end
 
         def public_state(product)
-          public_state_icon_elements[product_index(product)].attribute('data-public_state')
+          public_state_icon_elements[product_index(product)].attribute('data-public_state').to_sym
         end
 
-        def create_and_set_product_fields(options = {})
-          add_product
-          options.each do |field_key, field_value|
-            send("set_#{field_key}", field_value)
-          end
+        def delete_product(product)
+          products_elements[product_index(product)].hover
+          confirm(true) { delete_product_icon }
+          wait_saving
+        end
+
+        def set_rubric(params = {})
+          browser
+            .action
+            .move_to(rubrics_elements[product_index(params[:product])])
+            .click
+            .perform
+
+          self.rubric_search = params[:rubric]
+          rubric_search_submit
+          wait_until { first_rubric_search_result? }
+          first_rubric_search_result
+
+          wait_saving
         end
 
         def set_price_from_to(options = {})
@@ -124,21 +149,6 @@ module CompanySite
           self.wholesale_number = options.fetch(:wholesale_number, '')
 
           save_wholesale_price
-          wait_saving
-        end
-
-        def set_rubric(text)
-          browser
-            .action
-            .move_to(rubric_cell_element.element)
-            .click
-            .perform
-
-          self.rubric_search = text
-          rubric_search_submit
-          wait_until { first_rubric_search_result? }
-          first_rubric_search_result
-
           wait_saving
         end
 

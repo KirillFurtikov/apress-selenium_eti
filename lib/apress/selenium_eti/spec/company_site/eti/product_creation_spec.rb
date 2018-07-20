@@ -15,31 +15,27 @@ describe 'ЕТИ' do
   end
 
   describe 'Создание товара' do
-    fcontext 'когда товар без рубрики' do
+    context 'когда товар без рубрики' do
       before(:all) do
         @name = Faker::Number.number(5)
-        binding.pry
         @cs_eti_table_products.add_product(name: @name)
-        reload_page
         @cs_eti_header.search_product(@name)
         @product = @cs_eti_table_products.product(name: @name)
       end
 
-      after(:all) { @cs_eti_table.delete_product(@name) }
+      after(:all) { @cs_eti_table_products.delete_product(@product) }
 
       it('введенное имя отображается') { expect(@cs_eti_table_products.name(@product)).to eq @name }
-      it('товар не опубликован') { expect(@cs_eti_table_products.product_unpublished?(@name)).to be true }
+      it('товар не опубликован') { expect(@cs_eti_table_products.public_state(@product)).to eq :unpublished }
     end
 
     context 'когда товар с рубрикой' do
       before(:all) do
         @name = Faker::Number.number(5)
-        @cs_eti_table.add_product
-        @cs_eti_table.set_name(@name)
-        @cs_eti_table.wait_saving
+        @cs_eti_table_products.add_product(name: @name)
         @cs_eti_table.set_rubric(CONFIG['eti']['rubric'])
         @cs_eti_table.wait_until { @cs_eti_table.first_product_status_element.attribute('title') == 'Опубликованные' }
-        @cs_eti_table.refresh
+        reload_page
         @cs_eti_table.search_product(@name)
       end
 

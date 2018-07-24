@@ -25,10 +25,6 @@ module CompanySite
           end
         end
 
-        def product_index(product)
-          products_elements.index(product)
-        end
-
         def add_product(params = {})
           add_new_product
           wait_until { products_elements[0].attribute('class').include?('new') }
@@ -237,6 +233,12 @@ module CompanySite
         end
 
         ActiveSupport.run_load_hooks(:'apress/selenium_eti/company_site/eti/table_products', self)
+
+        private
+
+        def product_index(product)
+          products_elements.index(product)
+        end
       end
     end
   end

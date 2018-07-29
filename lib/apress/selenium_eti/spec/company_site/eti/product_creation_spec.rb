@@ -7,9 +7,11 @@ describe 'ЕТИ' do
     @cs_eti_table_status_bar = CompanySite::ETI::Table::StatusBar.new
     @cs_eti_header           = CompanySite::ETI::Header.new
     @cs_main_page            = CompanySite::MainPage.new
+    @cs_contacts_sidebar     = Extensions::CompanySite::SupportContactsSidebar.new
 
     log_in_as(:user)
     navigate_to_eti
+    @cs_contacts_sidebar.close
     # @cs_main_page.close_banner
     # @cs_eti_table.close_support_contacts if @cs_eti_table.close_support_contacts?
   end
@@ -29,21 +31,22 @@ describe 'ЕТИ' do
       it('товар не опубликован') { expect(@cs_eti_table_products.public_state(@product)).to eq :unpublished }
     end
 
-    context 'когда товар с рубрикой' do
+    fcontext 'когда товар с рубрикой' do
       before(:all) do
         @name = Faker::Number.number(5)
         @cs_eti_table_products.add_product(name: @name)
-        @cs_eti_table.set_rubric(CONFIG['eti']['rubric'])
-        @cs_eti_table.wait_until { @cs_eti_table.first_product_status_element.attribute('title') == 'Опубликованные' }
-        reload_page
-        @cs_eti_table.search_product(@name)
+        @product = @cs_eti_table_products.product(name: @name)
+        @cs_eti_table_products.set_rubric(@product, CONFIG['eti']['rubric'])
+        @cs_eti_header.search_product(@name)
+        @product = @cs_eti_table_products.product(name: @name)
+        binding.pry
       end
 
-      after(:all) { @cs_eti_table.delete_product(@name) }
+      after(:all) { @cs_eti_table_products.delete_product(@product) }
 
-      it('введенное имя отображается') { expect(@cs_eti_table.product_name?(@name)).to be true }
-      it('рубрика привязана') { expect(@cs_eti_table.product_rubric_tree(@name)).to include CONFIG['eti']['rubric'] }
-      it('товар опубликован') { expect(@cs_eti_table.product_published?(@name)).to be true }
+      it('введенное имя отображается') { expect(@cs_eti_table_products.name(@product)).to eq @name }
+      it('рубрика привязана') { expect(@cs_eti_table_products.rubric(@product)).to include CONFIG['eti']['rubric'] }
+      it('товар опубликован') { expect(@cs_eti_table_products.public_state(@product)).to eq :published }
     end
 
     context 'когда копируем товар' do

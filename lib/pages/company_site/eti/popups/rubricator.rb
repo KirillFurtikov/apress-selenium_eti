@@ -7,8 +7,8 @@ module CompanySite
         text_area(:search, css: '.js-input-rubric-search')
         button(:search_submit, css: '.js-button-rubric-search')
 
-        link(:found_rubrics_names, css: '.search-rubrics-container .js-src-link')
-        span(:found_rubrics_parents, css: '.search-rubrics-container .search-parents-rubrics')
+        elements(:found_rubrics_names, css: '.js-rubric-found .js-src-link')
+        elements(:found_rubrics_parents, css: '.js-rubric-found .search-parents-rubrics')
 
         def find(value)
           self.search = value
@@ -16,19 +16,13 @@ module CompanySite
         end
 
         def select_result(name)
-
+          found_rubrics_names_elements.find { |rubric_name| rubric_name.text == name }.click
         end
 
         # Выбор рубрики из дерева рубрик с раскрытием структуры
         # На вход массив из названий (от верхнего к нижнему уровню)
-        def select_rubric(rubric)
-          rubric_tree =
-            if rubric.is_a? String
-              rubric.split(',')
-            elsif rubric.is_a? Array
-              rubric
-            end
-          raise 'Only string and array is available argument classes!' if rubric_tree.nil?
+        def select_rubric(*rubric)
+          rubric_tree = rubric
 
           uncover_tree(rubric_tree)
           rubric_in_tree(rubric_tree.last)
@@ -40,9 +34,9 @@ module CompanySite
         end
 
         # Разворачивание конкретной рубрики в дереве рубрик
-        def uncover_rubric(rubric_name)
+        def uncover_rubric(name)
           Page.button(:rubric_cover, xpath: "//span[contains(text(),"\
-            "'#{rubric_name}')]/../*[contains(@class, 'js-rubricator-toggler') and not(contains(@class, 'open'))]")
+            "'#{name}')]/../*[contains(@class, 'js-rubricator-toggler') and not(contains(@class, 'open'))]")
           rubric_cover if rubric_cover?(2)
         end
 

@@ -4,6 +4,14 @@ module CompanySite
       class Products < self
         include CompanySite::ETI
 
+        EXISTS = {
+            available: 'В наличии',
+            not_available: 'Нет в наличии',
+            order: 'Под заказ',
+            awaiting: 'Ожидается поступление',
+            none: 'Не указано'
+        }
+
         button(:add_new_product, css: '.new.js-add-product')
         elements(:products, :row, css: "*[id^='product-item']")
         elements(:names, :cell, css: '.js-eti-name')
@@ -11,6 +19,11 @@ module CompanySite
         elements(:public_state_icon, :cell, css: '.js-eti-status')
         elements(:battery_level, :cell, css: '.js-battery-wrapper')
         elements(:battery_title, :cell, css: '.battery')
+        elements(:rubric_link, :cell, css: '.js-rubric-preview-link')
+        elements(:exists_link, :cell, css: '.js-eti-exists a')
+        elements(:exists_values, :link, css: '.ui-autocomplete li a')
+        elements(:announces, :cell, css: '.js-eti-announce')
+        div(:edit_box, css: '.editbox')
 
         button(:delete_product_icon, css: '.action-product .js-delete-product')
 
@@ -28,11 +41,12 @@ module CompanySite
         def add_product(params = {})
           add_new_product
           wait_until { products_elements[0].attribute('class').include?('new') }
-          set_name(product: products_elements[0], text: params[:name]) if params.key? :name
+          set_name(products_elements[0], params[:name]) if params.key? :name
+          set_rubric(products_elements[0], params[:rubric]) if params.key? :rubric
         end
 
-        def set_name(params = {})
-          name_element = names_elements[product_index(params[:product]) || 0]
+        def set_name(product, text)
+          name_element = names_elements[product_index(product) || 0]
           browser
             .action
             .move_to(name_element.element)
@@ -42,7 +56,7 @@ module CompanySite
             .send_keys('a')
             .key_up(:control)
             .send_keys(Selenium::WebDriver::Keys::KEYS[:clear])
-            .send_keys(params[:text])
+            .send_keys(text)
             .send_keys(Selenium::WebDriver::Keys::KEYS[:enter])
             .perform
 
@@ -50,7 +64,6 @@ module CompanySite
         end
 
         def name(product)
-          return if product.nil?
           names_elements[product_index(product)].element.text
         end
 
@@ -75,19 +88,58 @@ module CompanySite
           wait_saving
         end
 
-        def set_rubric(params = {})
-          browser
-            .action
-            .move_to(rubrics_elements[product_index(params[:product])])
-            .click
-            .perform
+        def rubric(product)
+          rubric_link_elements[product_index(product)].element.text
+        end
 
-          self.rubric_search = params[:rubric]
-          rubric_search_submit
-          wait_until { first_rubric_search_result? }
-          first_rubric_search_result
+        def set_rubric(product, rubric)
+          click_on_cell(rubric_link_elements[product_index(product)])
+
+          rubricator = Rubricator.new
+          rubricator.find(rubric)
+          rubricator.select_result(rubric)
 
           wait_saving
+        end
+
+        def set_exists(product, value)
+          click_on_cell(exists_link_elements[product_index(product)])
+
+          exists_values_elements.find { |element| element.text == EXISTS[value]}.click
+          wait_saving
+        end
+
+        def exists(product)
+          exists_link_elements[product_index(product)].element.text
+        end
+
+        def set_announce(product, text)
+          click_on_cell(announces_elements[product_index(product)])
+
+          browser
+            .action
+            .send_keys(Selenium::WebDriver::Keys::KEYS[:enter])
+            .perform
+
+          browser.switch_to.frame(1)
+          wait_until?(2) { edit_box? }
+
+          browser
+            .action
+            .key_down(:control)
+            .send_keys('a')
+            .key_up(:control)
+            .send_keys(Selenium::WebDriver::Keys::KEYS[:clear])
+            .send_keys(text)
+            .send_keys(Selenium::WebDriver::Keys::KEYS[:enter])
+            .perform
+
+          browser.switch_to.default_content
+          wait_saving
+        end
+
+        def announce(product)
+          announces_elements[product_index(product)].element.text
         end
 
         def set_price_from_to(options = {})
@@ -219,25 +271,22 @@ module CompanySite
           wait_saving
         end
 
-        def set_exists(value)
-          Page.link(:exists_link, xpath: "//li/a[text()='#{value}']")
-
-          browser
-            .action
-            .move_to(exist_cell_element.element)
-            .click
-            .perform
-
-          exists_link
-          wait_saving
-        end
-
         ActiveSupport.run_load_hooks(:'apress/selenium_eti/company_site/eti/table_products', self)
 
         private
 
         def product_index(product)
           products_elements.index(product)
+        end
+
+        def click_on_cell(element)
+          scroll_into_view(element)
+
+          browser
+            .action
+            .move_to(element.element)
+            .click
+            .perform
         end
       end
     end

@@ -1,7 +1,7 @@
 module CompanySite
   module ETI
     class Table
-      class PricePopup < self
+      class PricePopup < Popup
         div(:popup, css: '.popup-price')
         radio_button_group(:price_type, css: '.js-select-type-price')
         text_area(:price_value, css: '.pv-wrapper:not([style*="display: none"]) [name="price"]')
@@ -38,10 +38,6 @@ module CompanySite
           execute_script("arguments[0].value='#{options[:expires_at]}'", expires_at_element) if options[:expires_at]
           self.currency = options[:currency] if options[:currency]
           self.measure = options[:measure] if options[:measure]
-        end
-
-        def wait_for_visible
-          popup_element.when_visible
         end
       end
     end

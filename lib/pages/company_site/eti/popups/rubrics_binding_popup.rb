@@ -1,7 +1,8 @@
 module CompanySite
   module ETI
     class Table
-      class RubricsBindingPopup < self
+      class RubricsBindingPopup < Popup
+        div(:popup, css: '.js-popup-rubricator')
         button(:close, css: '.ui-dialog-titlebar-close')
 
         text_area(:search, css: '.js-input-rubric-search')

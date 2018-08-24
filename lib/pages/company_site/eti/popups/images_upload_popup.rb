@@ -1,7 +1,7 @@
 module CompanySite
   module ETI
     class Table
-      class ImagesUploadPopup < self
+      class ImagesUploadPopup < Popup
         div(:popup, css: '.js-popup-photo')
 
         button(:close, css: '.ui-dialog:not([style*="display: none"]) .ui-dialog-titlebar-close')
@@ -10,10 +10,6 @@ module CompanySite
         button(:image_url_submit, css: '.js-popup-photo .js-download-button')
         elements(:uploaded_images, css: '.js-popup-photo .js-img')
         elements(:delete_images, css: '.js-popup-photo .js-delete-photo')
-
-        def wait_for_visible
-          popup_element.when_visible
-        end
 
         def upload_from_file(file_path)
           self.upload_image_input = file_path

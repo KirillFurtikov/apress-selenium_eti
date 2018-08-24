@@ -29,14 +29,14 @@ describe 'ЕТИ' do
         expect(@cs_eti_table_products.group(@product)).to eq @group1
       end
 
-      context 'когда выбираем другую группу' do
+      context 'когда меняем на другую группу' do
         before do
           @cs_eti_table_products.set_group(@product, @group2)
           @cs_eti_header.search_product(@name, exact: true)
           @product = @cs_eti_table_products.product(name: @name)
         end
 
-        it 'группа меняется на новую' do
+        it 'группа изменится на новую' do
           expect(@cs_eti_table_products.group(@product)).to eq @group2
         end
       end

@@ -10,6 +10,7 @@ require "#{gem_directory}/lib/pages/company_site/eti/table_products"
 require "#{gem_directory}/lib/pages/company_site/eti/table_status_bar"
 
 # Попапы
+require "#{gem_directory}/lib/pages/company_site/eti/popups/popup"
 require "#{gem_directory}/lib/pages/company_site/eti/popups/description_popup"
 require "#{gem_directory}/lib/pages/company_site/eti/popups/groups_binding_popup"
 require "#{gem_directory}/lib/pages/company_site/eti/popups/images_upload_popup"

@@ -139,7 +139,7 @@ module CompanySite
           click_on_cell(public_state_icon_elements[product_index(product)].i_element)
 
           public_state_popup = PublicStatePopup.new
-          public_state_popup.wait_for_visible
+          public_state_popup.wait_popup
 
           public_state_popup.public_state = public_state
 
@@ -162,6 +162,7 @@ module CompanySite
           click_on_cell(rubric_link_elements[product_index(product)])
 
           rubrics_binding_popup = RubricsBindingPopup.new
+          rubrics_binding_popup.wait_popup
           rubrics_binding_popup.find(rubric)
           rubrics_binding_popup.select_result(rubric)
 
@@ -254,7 +255,7 @@ module CompanySite
         def set_price(product, options = {})
           click_on_cell(prices_elements[product_index(product)])
           price_popup = PricePopup.new
-          price_popup.wait_for_visible
+          price_popup.wait_popup
 
           case options[:type].to_sym
           when :exact
@@ -293,7 +294,7 @@ module CompanySite
           click_on_cell(wholesale_prices_elements[product_index(product)])
 
           wholesale_price_popup = WholesalePricePopup.new
-          wholesale_price_popup.wait_for_visible
+          wholesale_price_popup.wait_popup
           wholesale_price_popup.price_value = options[:price] if options[:price]
           wholesale_price_popup.currency = options[:currency] if options[:currency]
           wholesale_price_popup.measure = options[:measure] if options[:measure]
@@ -319,10 +320,8 @@ module CompanySite
         # @param [Hash]
         #
         def set_traits(product, traits)
-          click_on_cell(traits_link_elements[product_index(product)])
-
           traits_popup = TraitsPopup.new
-          traits_popup.wait_for_visible
+          traits_popup.wait_popup { click_on_cell(traits_link_elements[product_index(product)]) }
 
           traits.each { |k, v| traits_popup.set_trait_value(k, v) }
           traits_popup.save
@@ -347,7 +346,7 @@ module CompanySite
             .perform
 
           description_popup = DescriptionPopup.new
-          description_popup.wait_for_visible
+          description_popup.wait_popup
           description_popup.text_element.click
 
           browser
@@ -376,7 +375,7 @@ module CompanySite
           click_on_cell(groups_elements[product_index(product)])
 
           groups_binding_popup = GroupsBindingPopup.new
-          groups_binding_popup.wait_for_visible
+          groups_binding_popup.wait_popup
           groups_binding_popup.select_group(group)
           groups_binding_popup.save
 
@@ -405,7 +404,7 @@ module CompanySite
           click_on_cell(images_elements[product_index(product)])
 
           images_upload_popup = ImagesUploadPopup.new
-          images_upload_popup.wait_for_visible
+          images_upload_popup.wait_popup
 
           case options[:type].to_sym
           when :remote
@@ -435,8 +434,6 @@ module CompanySite
         end
 
         def click_on_cell(element)
-          scroll_into_view(element)
-
           browser
             .action
             .move_to(element.element)

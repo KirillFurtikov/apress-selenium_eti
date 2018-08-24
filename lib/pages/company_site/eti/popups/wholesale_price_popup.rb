@@ -1,7 +1,7 @@
 module CompanySite
   module ETI
     class Table
-      class WholesalePricePopup < self
+      class WholesalePricePopup < Popup
         div(:popup, css: '.js-popup-wholesale')
         text_area(:price_value, css: '.js-popup-wholesale .js-wholesale-price')
         select_list(:currency, css: '.js-popup-wholesale #wholesale_currency')
@@ -11,10 +11,6 @@ module CompanySite
 
         button(:save, css: '.js-popup-wholesale .js-save-wholesale')
         button(:cancel, css: '.js-popup-wholesale [title="Отменить"]')
-      end
-
-      def wait_for_visible
-        popup_element.when_visible
       end
     end
   end
